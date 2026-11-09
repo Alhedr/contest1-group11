@@ -135,4 +135,21 @@ InvalidCut:
     ret
 CutWire ENDP
 
+;-----------------------------------------------------
+; CheckCode: enteredCode:DWORD
+; Returns EAX: RESULT_DEFUSED or RESULT_STRIKE
+;-----------------------------------------------------
+CheckCode PROC enteredCode:DWORD ; Takes the entered code as input and checks against the bomb code
+    movzx eax, bombCode
+    xor eax, 5A5Ah ; Disarm cipher key
+    cmp enteredCode, eax
+    jne WrongCode ; Entered code is incorrect
+    mov eax, RESULT_DEFUSED ; Correct code entered
+    ret
+WrongCode:
+    inc strikes
+    mov eax, RESULT_STRIKE
+    ret
+CheckCode ENDP
+
 END
