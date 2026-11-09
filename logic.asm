@@ -16,6 +16,36 @@ targetWire  DWORD ?
 .code
 
 ;-----------------------------------------------------
+; CountColors: Tallies color frequencies in wireColors
+; Returns: AL = Red, AH = Blue, BL = Green, BH = Yellow
+;-----------------------------------------------------
+CountColors PROC USES ecx esi edx ; saves and restores ecx, esi, edx on stack
+    xor eax, eax ; AL = Red (0), AH = Blue (0)
+    xor ebx, ebx ; BL = Green (0), BH = Yellow (0)
+    movzx ecx, wireCount ; zero-extend wireCount into ecx
+    xor esi, esi
+CountLp:
+    mov dl, wireColors[esi]
+    cmp dl, WIRE_RED
+    je  IncRed
+    cmp dl, WIRE_BLUE
+    je  IncBlue
+    cmp dl, WIRE_GREEN
+    je  IncGreen
+    inc bh ; Fallthrough: must be WIRE_YELLOW
+    jmp NextWire
+IncRed:   inc al
+    jmp NextWire
+IncBlue:  inc ah
+    jmp NextWire
+IncGreen: inc bl
+NextWire:
+    inc esi
+    loop CountLp ; Repeat for all wires
+    ret
+CountColors ENDP
+
+;-----------------------------------------------------
 ; GenBombAttributes: Random 16-bit code & colors 0-3
 ;-----------------------------------------------------
 GenBombAttributes PROC
