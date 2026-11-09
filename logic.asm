@@ -65,6 +65,30 @@ GenColorLoop:
 GenBombAttributes ENDP
 
 ;-----------------------------------------------------
+; EvalRules: Evaluates colors and bombCode to set targetWire
+;-----------------------------------------------------
+EvalRules PROC USES eax ebx edx ; Saves and restores eax, ebx, edx on stack
+    call CountColors ; AL=Red, AH=Blue, BL=Green, BH=Yellow
+    ; Rule 1: >1 red and bombCode is odd -> cut wire 1 (second wire)
+    cmp al, 1
+    jbe CheckRule2
+    test bombCode, 1
+    jz  CheckRule2
+    mov targetWire, 1
+    ret
+CheckRule2: ; Rule 2: Last wire is yellow and no blue -> cut wire 0
+    cmp wireColors[3], WIRE_YELLOW
+    jne CheckRule3
+    cmp ah, 0
+    jne CheckRule3
+    mov targetWire, 0
+    ret
+CheckRule3: ; Fallback default: cut wire 3 (the last wire)
+    mov targetWire, 3
+    ret
+EvalRules ENDP
+
+;-----------------------------------------------------
 ; InitBomb: Resets strikes and wire arrays
 ;-----------------------------------------------------
 InitBomb PROC
@@ -80,6 +104,7 @@ ClearCutLoop:
     loop ClearCutLoop ; Repeat for all wires
 
     call GenBombAttributes ; Generate random bomb code and wire colors
+    call EvalRules ; Determine which wire is safe based on the rules
     ret
 InitBomb ENDP
 
