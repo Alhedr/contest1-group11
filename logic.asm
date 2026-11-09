@@ -15,4 +15,21 @@ targetWire  DWORD ?
 
 .code
 
+;-----------------------------------------------------
+; InitBomb: Resets strikes and wire arrays
+;-----------------------------------------------------
+InitBomb PROC
+    mov strikes, 0 ; Reset strikes to 0
+    mov wireCount, MAX_WIRES ; Set wire count to maximum
+
+    ; Clear wireCut array (0 = uncut)
+    mov ecx, MAX_WIRES
+    xor esi, esi
+ClearCutLoop:
+    mov wireCut[esi], 0 ; Mark wire as uncut
+    inc esi
+    loop ClearCutLoop ; Repeat for all wires
+    ret
+InitBomb ENDP
+
 END
