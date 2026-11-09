@@ -35,7 +35,6 @@ ELSE
 	EXTERNDEF wireCut:BYTE ; whether each wire is cut (1 = CUT, 0 = NOT CUT)     
 	EXTERNDEF bombCode:WORD ; the hex code 
 	EXTERNDEF strikes:BYTE ; how many mistakes the player has made     
-	EXTERNDEF rulesText:BYTE ; the rules page, as a string.
 	EXTERNDEF timeLeftMs:DWORD ; milliseconds left on the timer 
 								
 	
