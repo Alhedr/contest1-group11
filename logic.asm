@@ -108,4 +108,31 @@ ClearCutLoop:
     ret
 InitBomb ENDP
 
+;-----------------------------------------------------
+; CutWire: wireNum:DWORD (0-based)
+; Returns EAX: RESULT_OK, RESULT_STRIKE, RESULT_INVALID
+;-----------------------------------------------------
+CutWire PROC USES esi, wireNum:DWORD ; Saves and restores esi on stack and takes wireNum as input
+    mov esi, wireNum
+    movzx eax, wireCount
+    cmp esi, eax
+    jae InvalidCut ; Out of bounds
+    cmp wireCut[esi], 1
+    je  InvalidCut ; Already cut
+    mov wireCut[esi], 1 ; Mark severed
+
+    mov eax, targetWire
+    cmp esi, eax ; Compare cut wire with target wire
+    jne WrongWire ; Wrong wire cut
+    mov eax, RESULT_OK ; Correct wire cut
+    ret
+WrongWire:
+    inc strikes
+    mov eax, RESULT_STRIKE
+    ret
+InvalidCut:
+    mov eax, RESULT_INVALID
+    ret
+CutWire ENDP
+
 END
