@@ -19,10 +19,10 @@ targetWire  DWORD ?
 ; CountColors: Tallies color frequencies in wireColors
 ; Returns: AL = Red, AH = Blue, BL = Green, BH = Yellow
 ;-----------------------------------------------------
-CountColors PROC USES ecx esi edx ; saves and restores ecx, esi, edx on stack
+CountColors PROC USES ecx esi edx ; Saves and restores ecx, esi, edx on stack
     xor eax, eax ; AL = Red (0), AH = Blue (0)
     xor ebx, ebx ; BL = Green (0), BH = Yellow (0)
-    movzx ecx, wireCount ; zero-extend wireCount into ecx
+    movzx ecx, wireCount ; Zero-extend wireCount into ecx
     xor esi, esi
 CountLp:
     mov dl, wireColors[esi]
@@ -136,7 +136,7 @@ CutWire PROC USES esi, wireNum:DWORD ; Saves and restores esi on stack and takes
     mov eax, RESULT_OK ; Correct wire cut
     ret
 WrongWire:
-    inc strikes
+    inc strikes ; Increment strike count for wrong wire
     mov eax, RESULT_STRIKE
     ret
 InvalidCut:
@@ -156,7 +156,7 @@ CheckCode PROC enteredCode:DWORD ; Takes the entered code as input and checks ag
     mov eax, RESULT_DEFUSED ; Correct code entered
     ret
 WrongCode:
-    inc strikes
+    inc strikes ; Increment strike count for wrong code
     mov eax, RESULT_STRIKE
     ret
 CheckCode ENDP
