@@ -10,11 +10,23 @@ msgBomb BYTE "DEFUSE THE BOMB! YOU HAVE 2 MINUTES", 0
 msgTimeUp BYTE "BOOM! Time is up.",0
 msgTime BYTE "Time left: ",0
 
+; Wires:
+msgWire BYTE "Wire ",0
+msgColon BYTE ": ",0
+nameRed BYTE "red",0
+nameBlue BYTE "blue",0
+nameGreen BYTE "green",0
+nameYellow BYTE "yellow",0
+namePtrs DWORD nameRed, nameBlue, nameGreen, nameYellow ; we put the same order as WIRE_RED..etc
+wireAttr BYTE lightRed, lightBlue, lightGreen, yellow ; screen color to draw each wire color
+
 .code
 main PROC
 	mov edx, OFFSET msgBomb 
 	call WriteString ; Show the start message
 	call Crlf
+	call Randomize ; seed the random numbers once
+	INVOKE InitBomb ; logic.asm: random wires and codes
 	INVOKE GetTickCount ; eax is ms since windows started
 	mov startTick, eax
 	
