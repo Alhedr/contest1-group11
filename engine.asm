@@ -10,6 +10,7 @@ msgBomb BYTE "DEFUSE THE BOMB! YOU HAVE 2 MINUTES", 0
 msgTimeUp BYTE "BOOM! Time is up.",0
 msgTime BYTE "Time left: ",0
 msgHint BYTE "Cut the correct wire, then enter the PIN. Rules: MANUAL.md", 0
+msgCode BYTE "Bomb code: ",0
 
 ; Wires:
 msgWire BYTE "Wire ",0
@@ -31,6 +32,14 @@ main PROC
 	call Crlf
 	call Randomize ; seed the random numbers once
 	INVOKE InitBomb ; logic.asm: random wires and codes
+	mov dh, 8 ; Row 8
+	mov dl, 0 ; column 0
+	call Gotoxy
+	mov edx, OFFSET msgCode
+	call WriteString ; "Bomb code: "
+	movzx eax,  bombCode ; from logic.asm
+	mov ebx, 2 ; 2 bytes = 4 hex digits
+	call WriteHexB
 	INVOKE GetTickCount ; eax is ms since windows started
 	mov startTick, eax
 	
