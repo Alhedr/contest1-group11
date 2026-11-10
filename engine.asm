@@ -78,6 +78,8 @@ DrawL: ; Draw Loop
 	mov dh, al
 	mov dl , 0 ; column 0
 	call Gotoxy
+	mov eax, lightGray 
+	call SetTextColor ; a color for wire x
 	mov edx, OFFSET msgWire
 	call WriteString ; "Wire "
 	mov eax, esi
@@ -86,8 +88,12 @@ DrawL: ; Draw Loop
 	mov edx, OFFSET msgColon
 	call WriteString
 	movzx ebx, wireColors[esi] ; The color id
+	movzx eax, wireAttr[ebx] ; screen color for x wire
+	call SetTextColor
 	mov edx, namePtrs [ebx*TYPE namePtrs] ; edx is the address of the color name
 	call WriteString ; colors 
+	mov eax, lightGray ; goes back to the normal color
+	call SetTextColor
 	inc esi ; next wire 
 	cmp esi, MAX_WIRES
 	jb DrawL
