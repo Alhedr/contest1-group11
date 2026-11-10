@@ -13,6 +13,8 @@ msgHint BYTE "Cut the correct wire, then enter the PIN. Rules: MANUAL.md", 0
 msgCode BYTE "Bomb code: ",0
 msgStrikes BYTE "Strikes: ",0
 msgOutOf BYTE "/3",0
+msgKeys BYTE "Press 1-4 to cut a wire",0
+msgBoom3 BYTE "BOOM! THREE STRIKES!!!",0
 
 ; Wires:
 msgWire BYTE "Wire ",0
@@ -42,6 +44,11 @@ main PROC
 	movzx eax,  bombCode ; from logic.asm
 	mov ebx, 2 ; 2 bytes = 4 hex digits
 	call WriteHexB
+	mov dh, 9 ; row 9
+	mov dl, 0 
+	call Gotoxy
+	mov edx, OFFSET msgKeys
+	call WriteString
 	INVOKE GetTickCount ; eax is ms since windows started
 	mov startTick, eax
 	
@@ -69,16 +76,42 @@ main PROC
 	call WriteChar ; now instead of printing 990 after 100, it prints 99 after 100
 	call DrawStrikes ; Strikes: n/3
 	call DrawWires ; show the 4 wired under the timer
+	call ReadKey ; check the keyboard without waiting
+	jz NoKey 
+	cmp al, '1'
+	jb NoKey ; not a wire number
+	cmp al, '4'
+	ja NoKey ; not a wire number
+	sub al, '1' ; 1-4. --> 0-3
+	movzx eax, al
+	INVOKE CutWire, eax
+	cmp eax, RESULT_STRIKE
+	jne NoKey ; not strike? nothing
+	cmp strikes, MAX_STRIKES
+	jae Exploded
+NoKey:
 	INVOKE Sleep, TICK_MS ; wait 50 ms
     jmp  GL ; check again
 	
+	Exploded:
+		call DrawStrikes ; show 3/3
+		mov edx, OFFSET msgBoom3
+		jmp EndGame
+		
 	TimeUp:
-	call Crlf
-	mov  edx, OFFSET msgTimeUp
-    call WriteString ; time ran out
-	call Crlf
+		mov edx, OFFSET msgTimeUp
+	
+	EndGame: 
+		push edx ; keep the msg addrs
+		mov dh, 12 ; Row 12
+		mov dl, 0
+		call Gotoxy
+		pop edx 
+		call WriteString
+		call Crlf
+		
     
-    exit
+		exit
 
 
 main ENDP
