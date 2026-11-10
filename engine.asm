@@ -15,6 +15,10 @@ msgStrikes BYTE "Strikes: ",0
 msgOutOf BYTE "/3",0
 msgKeys BYTE "Press 1-4 to cut a wire",0
 msgBoom3 BYTE "BOOM! THREE STRIKES!!!",0
+msgPin BYTE "Wire cut! Enter the PIN (hex): ",0
+msgBlank BYTE "        ",0 ; erases an old PIN
+msgWrongPin BYTE "Wrong PIN! Strike. Try again.",0
+msgWin BYTE "BOMB DEFUSED! You win!",0
 
 ; Wires:
 msgWire BYTE "Wire ",0
@@ -85,6 +89,8 @@ main PROC
 	sub al, '1' ; 1-4. --> 0-3
 	movzx eax, al
 	INVOKE CutWire, eax
+	cmp eax, RESULT_OK
+	je PinStep ; correct wire: ask for the PIN
 	cmp eax, RESULT_STRIKE
 	jne NoKey ; not strike? nothing
 	cmp strikes, MAX_STRIKES
@@ -92,6 +98,40 @@ main PROC
 NoKey:
 	INVOKE Sleep, TICK_MS ; wait 50 ms
     jmp  GL ; check again
+	PinStep:
+	call DrawWires ; redraw the wires
+	call DrawStrikes
+	mov dh, 9 ; Row 9
+	mov dl, 0
+	call Gotoxy
+	mov edx, OFFSET msgPin
+	call WriteString ; "Wire cut! Enter the PIN (hex): "
+	mov edx, OFFSET msgBlank
+	call WriteString ; erase the previous attempt
+	mov dh, 9
+	mov dl, LENGTHOF msgPin - 1 ; column right after the prompt
+	call Gotoxy
+	call ReadHex ; EAX = PIN typed (timer pauses while typing)
+	mov ebx, eax ; save the PIN
+	INVOKE GetTickCount
+	sub eax, startTick
+	cmp eax, TIME_LIMIT_MS
+	jae TimeUp ; took too long to type it
+	INVOKE CheckCode, ebx ; logic.asm checks the PIN
+	cmp eax, RESULT_DEFUSED
+	je Defused
+	cmp strikes, MAX_STRIKES
+	jae Exploded ; 3rd strike
+	mov dh, 10 ; Row 10
+	mov dl, 0
+	call Gotoxy
+	mov edx, OFFSET msgWrongPin
+	call WriteString
+	jmp PinStep ; ask again
+
+Defused:
+	mov edx, OFFSET msgWin
+	jmp EndGame
 	
 	Exploded:
 		call DrawStrikes ; show 3/3
