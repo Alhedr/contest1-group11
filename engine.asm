@@ -11,6 +11,8 @@ msgTimeUp BYTE "BOOM! Time is up.",0
 msgTime BYTE "Time left: ",0
 msgHint BYTE "Cut the correct wire, then enter the PIN. Rules: MANUAL.md", 0
 msgCode BYTE "Bomb code: ",0
+msgStrikes BYTE "Strikes: ",0
+msgOutOf BYTE "/3",0
 
 ; Wires:
 msgWire BYTE "Wire ",0
@@ -65,6 +67,7 @@ main PROC
 	call WriteDec 
 	mov al, ' ' 
 	call WriteChar ; now instead of printing 990 after 100, it prints 99 after 100
+	call DrawStrikes ; Strikes: n/3
 	call DrawWires ; show the 4 wired under the timer
 	INVOKE Sleep, TICK_MS ; wait 50 ms
     jmp  GL ; check again
@@ -108,6 +111,18 @@ DrawL: ; Draw Loop
 	jb DrawL
 	ret
 DrawWires ENDP
+DrawStrikes PROC USES eax edx
+	mov dh, 3 ; row 3
+	mov dl, 0
+	call Gotoxy
+	mov edx, OFFSET msgStrikes
+	call WriteString
+	movzx eax, strikes
+	call WriteDec
+	mov edx, OFFSET msgOutOf
+	call WriteString
+	ret
+DrawStrikes ENDP
 	
 	
 	
