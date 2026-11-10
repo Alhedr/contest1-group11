@@ -9,6 +9,7 @@ startTick DWORD ? ; GetTickCount value when the game started
 msgBomb BYTE "DEFUSE THE BOMB! YOU HAVE 2 MINUTES", 0
 msgTimeUp BYTE "BOOM! Time is up.",0
 msgTime BYTE "Time left: ",0
+msgHint BYTE "Cut the correct wire, then enter the PIN. Rules: MANUAL.md", 0
 
 ; Wires:
 msgWire BYTE "Wire ",0
@@ -24,6 +25,9 @@ wireAttr BYTE lightRed, lightBlue, lightGreen, yellow ; screen color to draw eac
 main PROC
 	mov edx, OFFSET msgBomb 
 	call WriteString ; Show the start message
+	call Crlf
+	mov edx, OFFSET msgHint
+	call WriteString
 	call Crlf
 	call Randomize ; seed the random numbers once
 	INVOKE InitBomb ; logic.asm: random wires and codes
@@ -52,8 +56,7 @@ main PROC
 	call WriteDec 
 	mov al, ' ' 
 	call WriteChar ; now instead of printing 990 after 100, it prints 99 after 100
-	
-	
+	call DrawWires ; show the 4 wired under the timer
 	INVOKE Sleep, TICK_MS ; wait 50 ms
     jmp  GL ; check again
 	
@@ -67,4 +70,30 @@ main PROC
 
 
 main ENDP
+DrawWires PROC USES eax ebx edx esi
+	mov esi, 0
+DrawL: ; Draw Loop 
+	mov eax, esi
+	add al, 4 ; row = 4 + wire
+	mov dh, al
+	mov dl , 0 ; column 0
+	call Gotoxy
+	mov edx, OFFSET msgWire
+	call WriteString ; "Wire "
+	mov eax, esi
+	inc eax ; so the player sees 1-4 wires
+	call WriteDec
+	mov edx, OFFSET msgColon
+	call WriteString
+	movzx ebx, wireColors[esi] ; The color id
+	mov edx, namePtrs [ebx*TYPE namePtrs] ; edx is the address of the color name
+	call WriteString ; colors 
+	inc esi ; next wire 
+	cmp esi, MAX_WIRES
+	jb DrawL
+	ret
+DrawWires ENDP
+	
+	
+	
 END main
